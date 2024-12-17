@@ -14,12 +14,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Step 2: Set up SSH key
+    # Step 2: Set up SSH key for EC2 access
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
         echo "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa  # Ensure private key has correct permissions
       env:
         EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
@@ -30,20 +30,14 @@ jobs:
       env:
         EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
 
-    # Step 4: Check if the file exists
-    - name: Check if myfile.txt exists
+    # Step 4: Copy file to EC2 with verbose output
+    - name: Copy file to EC2 with verbose output
       run: |
-        ls -l
-        pwd
-
-    # Step 5: Copy file to EC2
-    - name: Copy file to EC2
-      run: |
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no myfile.txt ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/
+        scp -vvv -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no myfile.txt ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/
       env:
         EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
 
-    # Step 6: Run commands on EC2 (optional)
+    # Step 5: Run commands on EC2 (optional)
     - name: Run commands on EC2
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
