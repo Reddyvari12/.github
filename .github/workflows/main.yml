@@ -3,18 +3,18 @@ name: Deploy File to EC2 Instance
 on:
   push:
     branches:
-      - main  # Trigger the workflow when changes are pushed to the main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Use an Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
-    # Checkout repository code
+    # Step 1: Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Set up SSH keys for EC2 access
+    # Step 2: Set up SSH key
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
@@ -23,21 +23,27 @@ jobs:
       env:
         EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-    # Add EC2 host to known hosts to prevent SSH authenticity check
+    # Step 3: Add EC2 instance to known hosts
     - name: Add EC2 to known hosts
       run: |
         ssh-keyscan -H ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
       env:
         EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
 
-    # Copy a file to EC2
+    # Step 4: Check if the file exists
+    - name: Check if myfile.txt exists
+      run: |
+        ls -l
+        pwd
+
+    # Step 5: Copy file to EC2
     - name: Copy file to EC2
       run: |
         scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no myfile.txt ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/
       env:
         EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
 
-    # Run commands on EC2 (Optional)
+    # Step 6: Run commands on EC2 (optional)
     - name: Run commands on EC2
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
