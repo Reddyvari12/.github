@@ -26,7 +26,7 @@ jobs:
     # Step 3: Set SSH known hosts (This prevents SSH warnings about authenticity)
     - name: Add EC2 to known hosts
       run: |
-        ssh-keyscan -H ${{ 3.27.164.172 }} >> ~/.ssh/known_hosts
+        ssh-keyscan -v -H ${{ 3.27.164.172 }} >> ~/.ssh/known_hosts
 
     # Step 4: Copy file to EC2 instance
     - name: Copy file to EC2
